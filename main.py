@@ -53,19 +53,27 @@ def experimental_grating_offset(theta, beta): #beta = [a, phi]
 
 calibration_data = np.array(calibration)
 
-x_data = np.mean(calibration_data, axis = 0) #array of 5 theta means, one for each m
+theta_data = np.mean(calibration_data, axis = 0) #array of 5 theta means, one for each m
 
-print(len(x_data))
+print(len(theta_data))
 
-y_data = np.array(lambda_average * m_active)
+mlambda_data = np.array(lambda_average * m_active)
 
-print(len(y_data))
+print(len(mlambda_data))
 
 a_guess = (1/300)*1e-3
 phi_guess = 0
 
 beta0 = [a_guess, phi_guess]
-solution_calibration = odr_fit(experimental_grating_offset, x_data, y_data, beta0)
+
+#uncertainty of the vernier was 0.25 arcminutes
+
+theta_delta = (0.25/60)*(np.pi/180) #converting vernier uncertainty to radians 
+mlambda_delta = 0.0001e-9 * np.abs(m_active) #  multiply abs(m) by the NIST database uncertainty (0.0001e-9)
+
+weight_theta = 1/(theta_delta)
+weight_mlambda = 1/(mlambda_delta)
+solution_calibration = odr_fit(experimental_grating_offset, theta_data, mlambda_data, beta0)
 
 
 beta_solution = solution_calibration.beta
@@ -78,7 +86,12 @@ phi_predicted = beta_solution[1]
 
 #Great! Now we have computed a and phi, from there it goes much faster
 
+#ODR also computed uncertainties for a and phi
 
+a_delta, phi_delta = solution_calibration.sd_beta
+
+print(a_delta)
+print(phi_delta)
 
 
 
