@@ -73,8 +73,10 @@ beta_solution = solution_calibration.beta
 print(beta_solution[0])
 print(beta_solution[1])
 
+a_predicted = beta_solution[0]
+phi_predicted = beta_solution[1]
 
-
+#Great! Now we have computed a and phi, from there it goes much faster
 
 
 
