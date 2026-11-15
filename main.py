@@ -31,7 +31,53 @@ lightblue = AngleTransform(ReadFile("LightBlue.csv"))
 green = AngleTransform(ReadFile("Green.csv"))
 red = AngleTransform(ReadFile("Red.csv"))
 print(calibration)
-print(darkblue)
-print(lightblue)
-print(green)
-print(red)
+#print(darkblue)
+#print(lightblue)
+#print(green)
+#print(red)
+
+#First, we need to determine an experimental a and phi (little angular grating offset)
+
+m_active = np.array([0,1,2,-1,-2]) #the relevant m's for the calibration
+lambda_Na_D1 = 588.9950e-9 
+lambda_Na_D2 = 589.5924e-9 
+
+
+#for now, let's just do an average (maybe use the intensity approach xinyi mentioned??)
+lambda_average = (lambda_Na_D1 + lambda_Na_D2)/2 #need to account for uncertainty somehow
+
+#the x axis will be theta and the y axis will be m* lambda
+def experimental_grating_offset(theta, beta): #beta = [a, phi]
+    return beta[0]*(np.sin(theta - beta[1]) - np.sin(beta[1]))
+
+
+calibration_data = np.array(calibration)
+
+x_data = np.mean(calibration_data, axis = 0) #array of 5 theta means, one for each m
+
+print(len(x_data))
+
+y_data = np.array(lambda_average * m_active)
+
+print(len(y_data))
+
+a_guess = (1/300)*1e-3
+phi_guess = 0
+
+beta0 = [a_guess, phi_guess]
+solution_calibration = odr_fit(experimental_grating_offset, x_data, y_data, beta0)
+
+
+beta_solution = solution_calibration.beta
+
+print(beta_solution[0])
+print(beta_solution[1])
+
+
+
+
+
+
+
+
+
